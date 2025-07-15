@@ -25,7 +25,7 @@ class Genome:
         self.calcThresh()
 
     def mutate(self):
-        s = random.randint(0,5)
+        s = random.randint(0,4)
 #        print("[DEBUG] gene selected", s)
         if self.genes[s] == 0:
             self.genes[s] = 1
