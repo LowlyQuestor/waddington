@@ -31,23 +31,23 @@ class Environment:
             acc += 1
 
     def reproduction(self):
-        pop = 0
+        pop = len(self.creatures)
         acc = 0
-        for i in self.creatures:
-            pop += 1
         openSpots = self.population_cap - pop
         if pop < self.population_cap:
-            print("reproduce this many times:", openSpots)
+            print("new spots avaliable:", openSpots)
         while acc < openSpots:
             parentOrganism = rand.choice(self.creatures)
-            parentGenes = parentOrganism.getGenes()
-            parentId = parentOrganism.getId()
-            self.creatures.append(c.Creature(self.totalCreaturesEver))
-            self.creatures[-1].setOffspringGenomeAce(parentGenes, parentId)
-            self.totalCreaturesEver += 1
+            self.reproduceCreature(parentOrganism)
+            print(parentOrganism.getId(), "begot", self.creatures[-1].getId())
             acc += 1
 
-
+    def reproduceCreature(self, parent):
+        newId = len(self.creatures) + 1 # id of new creature is one after last creature
+        temp = c.Creature(newId)
+        temp.setOffspringGenomeAce(parent)
+        self.creatures.append(temp)
+            
 
     def print(self):
         print("\nEnvironment summary")
@@ -58,6 +58,9 @@ class Environment:
             i.printCreature()
             print("\n")
 
+    def setRandTemp(self):
+        self.temp = rand.randint(1,100)
+
 p = Environment()
 p.populate(5)
 acc = 1
@@ -66,7 +69,7 @@ while continue_answer == "y":
     print("\n \n \ngeneration:" + str(acc))
     acc += 1
     p.print()
-    p.__init__()
+    p.setRandTemp()
     p.cullPopulation()
     p.reproduction()
-    continue_answer = input("Continue? y/n")
+    continue_answer = input("Continue? y/n ")

@@ -3,16 +3,14 @@ import random
 
 class Genome:
     threshold = 0
-    myParent = "?"
     def __init__(self):
         self.genes = []
         self.idnum = "0"
-         
     
     def calcThresh(self):
          acc = 0
          for i in self.genes:
-              if i == True:
+              if i == 1:
                    acc += 1
               else:
                    continue
@@ -22,23 +20,31 @@ class Genome:
     def makeRandomGenome(self):
         i = 0
         while i < 5:
-             self.genes.append(bool(random.randint(0,1)))
+             self.genes.append(random.randint(0,1))
              i += 1
         self.calcThresh()
 
-    def setOffspringGenomeAce(self, parentGenes, parentId):
-        chance = random.randint(0,100)
-        self.genes = parentGenes
-        geneSelected = random.randint(0,4)
-        self.genes[0] = "M"
-        self.myParent = str(parentId)
+    def mutate(self):
+        s = random.randint(0,5)
+#        print("[DEBUG] gene selected", s)
+        if self.genes[s] == 0:
+            self.genes[s] = 1
+        else:
+            self.genes[s] = 0
         self.calcThresh()
+        self.genes[0] = "M"
+
+#    def setOffspringGenomeAce(self, parentGenes, parentId):
+#        chance = random.randint(0,100)
+#        self.genes = parentGenes
+#        geneSelected = random.randint(0,4)
+#        self.genes[0] = "M"
+#        self.parent = str(parentId)
+#        self.calcThresh()
                 
     def getThresh(self):
           return self.threshold
 
-    def getParent(self):
-          return self.myParent
     
     def getGenesString(self):
         geneString = "".join(map(str, self.genes))
@@ -59,12 +65,16 @@ class Creature:
     def __init__(self, idnum):
         self.idnum = idnum
         self.genome = Genome()
+        self.parentId = "?"
 
     def setRandomGenome(self):
         self.genome.makeRandomGenome()
 
-    def setOffspringGenomeAce(self, parentGenes, parentId):
-        self.genome.setOffspringGenomeAce(parentGenes, parentId)
+    def setOffspringGenomeAce(self, parent):
+        self.parentId = parent.getId()
+        self.genome.genes = parent.getGenes().copy()
+#        print("[DEBUG] Genome size:", len(self.genome.genes))
+        self.genome.mutate()
         
     def getId(self):
         return self.idnum
@@ -79,7 +89,7 @@ class Creature:
         return self.genome.getGenes()
     
     def getParent(self):
-        return self.genome.getParent()
+        return self.parentId
     
     def printCreature(self):
         print("Creature id: ", self.idnum, "\n",
