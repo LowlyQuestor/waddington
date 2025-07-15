@@ -3,13 +3,12 @@ import creature as c
 import random as rand
 
 class Environment:
-    temp = 0
     population_cap = 5
-    totalCreaturesEver = 0
     creatures = []
+    
     def __init__(self):
         self.temp = rand.randint(1, 100)
-
+        self.totalCreaturesEver = 0
 
     def populate(self, n): # populate environment with n # of creatures
         acc = 0

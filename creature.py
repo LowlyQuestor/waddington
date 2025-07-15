@@ -34,13 +34,6 @@ class Genome:
         self.calcThresh()
         self.genes[0] = "M"
 
-#    def setOffspringGenomeAce(self, parentGenes, parentId):
-#        chance = random.randint(0,100)
-#        self.genes = parentGenes
-#        geneSelected = random.randint(0,4)
-#        self.genes[0] = "M"
-#        self.parent = str(parentId)
-#        self.calcThresh()
                 
     def getThresh(self):
           return self.threshold
