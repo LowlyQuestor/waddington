@@ -1,88 +1,121 @@
-# TODO: add code to simulate environment for the creatures
+# The environment and graveyard simulate darwinian selection
 import creature as c
 import random as rand
+import uuid
+import helpers
+
+
+def randId():  # Generate id for creature dict, will move
+    return uuid.uuid4()
+
+
+class Graveyard:
+    creatures = dict()
+
+    def __init__(self):
+        return
+
+    def add(self, c):
+        self.creatures.update({c.getId(): c})
 
 
 class Environment:
-    population_cap = 5
-    creatures = []
+    creatures = dict()  # Allows using creature IDs as indexes
+    graveYard = Graveyard()
 
-    def __init__(self):
+    def __init__(self, cap):  # TODO: add debug mode
         self.temp = rand.randint(1, 100)
-        self.totalCreaturesEver = 0
+        self.populationCap = cap
+#        self.totalCreatures = 0
 
-    def populate(self, n):  # populate environment with n # of creatures
-        acc = 0
-        while acc < n:
-            self.creatures.append(c.Creature(acc))
-            self.creatures[acc].setRandomGenome()
-            acc += 1
-            self.totalCreaturesEver += 1
+    def addCreature(self):  # Adds random creature
+        id = randId()
+        creature = c.Creature(id)
+        creature.setRandomGenome()
+        self.creatures.update({id: creature})  # Add creature to dict badly
 
-    def cullPopulation(self):  # checks to see if creatures in enviornment survive
-        deathList = []
-        acc = 0
-        for i in self.creatures:
-            if self.creatures[acc].getThresh() < self.temp:
-                myId = self.creatures[acc].getId()
-                chance = rand.randint(1, 100)
-                if chance > 50:
-                    deathList.append(i)
-                else: 
-                    print("Creature", myId, "survived, despite the odds")
-            acc += 1
-        acc = 0
-        for i in deathList:
-            myId = deathList[acc].getId()
-            print("creature " + str(myId) + " has perished")
-            self.creatures.remove(i)
-            acc += 1
-
-    def reproduction(self):
-        pop = len(self.creatures)
-        acc = 0
-        openSpots = self.population_cap - pop
-        if pop < self.population_cap:
-            print("new spots avaliable:", openSpots)
-        while acc < openSpots:
-            parentOrganism = rand.choice(self.creatures)
-            self.reproduceCreature(parentOrganism)
-            self.totalCreaturesEver += 1
-            ##DEBUG print(parentOrganism.getId(), "begot", self.creatures[-1].getId())
-            acc += 1
-
-    def reproduceCreature(self, parent):
-        newId = self.totalCreaturesEver  # id of new creature is one after last
-        temp = c.Creature(newId)
-        temp.setOffspringGenomeAce(parent)
-        self.creatures.append(temp)
-
-    def print(self):
-        print("\nEnvironment summary")
-        print("Temperature: ", self.temp, "\n")
-        print("Current Population: \n")
-
-        for i in self.creatures:
-            i.printCreature()
-            if self.temp > i.getThresh():
-                print("Color: Blue")
-            else:
-                print("Color: Red")
-            print("\n")
+    def populate(self, n):  # Populate with n creatures
+        helpers.doNtimes(self.addCreature, n)
 
     def setRandTemp(self):
         self.temp = rand.randint(1, 100)
 
+    def reproduceCreature(self, parentId):
+        newId = randId()
+        temp = c.Creature(newId)
+        temp.setOffspringGenomeAce(self.creatures.get(parentId))
+        self.creatures.update({newId: temp})  # Add new creature
 
-p = Environment()
+    def reproduction(self):  # Simulate random gene selection
+        acc = 0
+        self.printOpenSpaces()
+        while acc < self.getOpenSpaces():  # while there's room
+            parentOrganism = rand.choice(self.getCreatureList())
+            self.reproduceCreature(parentOrganism.getId())
+            print("{} has reproduced!".format(parentOrganism.getId()))
+            acc += 1
+
+    def killCreature(self, creatureId):
+        self.graveYard.add(self.creatures.get(creatureId))
+        self.creatures.pop(creatureId)  # Remove creature
+
+    def testCreature(self, creatureId):  # Randomly kill c if they cant survive
+        if self.isFit(creatureId):
+            chance = rand.randint(1, 100)
+            if chance >= 50:
+                self.killCreature(creatureId)
+                print("{} has perished".format(creatureId))
+            else:
+                print("{} survived, despite the odds".format(creatureId))
+
+    def isFit(self, creatureId):
+        if self.getCreature(creatureId).getThresh() < self.temp:
+            return False
+        else:
+            return True
+
+    def cullPopulation(self):
+        for i in self.getIdList():
+            self.testCreature(i)
+
+    def getCreature(self, creatureId):
+        return self.creatures.get(creatureId)
+
+    def getCreatureList(self):
+        return list(self.creatures.values())  # Does not return list by default
+
+    def getIdList(self):
+        return list(self.creatures.keys())
+
+    def getPopulation(self):
+        return len(self.getCreatureList())
+
+    def getPopulationCap(self):
+        return self.populationCap
+
+    def getOpenSpaces(self):
+        return self.getPopulationCap() - self.getPopulation()
+
+    def print(self):
+        print("\nEnvironment Summary\nTemperature: {}".format(self.temp))
+        print("Total population: {}".format(self.getPopulation()))
+
+    def printOpenSpaces(self):
+        if self.getPopulation() < self.getPopulationCap():  # if there's room
+            print("{} new spots are avaliable".format(self.getOpenSpaces()))
+        else:
+            print("No new spaces avaliable in enviornment")
+
+
+p = Environment(5)
 p.populate(5)
-acc = 1
-continue_answer = "y"
-while continue_answer == "y":
-    print("\n \n \ngeneration:" + str(acc))
-    acc += 1
+choice = "y"
+gen = 0
+while choice == "y":
+    print("\n generation: {}".format(gen))
+    gen += 1
     p.setRandTemp()
     p.print()
     p.cullPopulation()
     p.reproduction()
-    continue_answer = input("Continue? y/n ")
+    choice = input("Continue? y/n")
