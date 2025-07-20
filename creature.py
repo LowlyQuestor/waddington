@@ -1,37 +1,51 @@
 # TODO: create a prototype for the simulated creature
 import random
+
 class Genome:
     threshold = 0
     def __init__(self):
         self.genes = []
-         
+        self.idnum = "0"
     
     def calcThresh(self):
          acc = 0
          for i in self.genes:
-              if i == True:
+              if i == 1:
                    acc += 1
               else:
                    continue
               self.threshold = (100 - (20 * acc))
 
+
     def makeRandomGenome(self):
         i = 0
         while i < 5:
-             self.genes.append(bool(random.randint(0,1)))
+             self.genes.append(random.randint(0,1))
              i += 1
         self.calcThresh()
 
     def mutate(self):
-        if len(genes) != 0:
-            chance = random.randint(0, 100)
-            if chance > 25:
-                i = random.randint(0,4)
-                self.genes[i] = not(self.genes[i])
-                self.calcThresh()
+        s = random.randint(0,4)
+#        print("[DEBUG] gene selected", s)
+        if self.genes[s] == 0:
+            self.genes[s] = 1
+        else:
+            self.genes[s] = 0
+        self.calcThresh()
+
                 
     def getThresh(self):
           return self.threshold
+
+    
+    def getGenesString(self):
+        geneString = "".join(map(str, self.genes))
+        geneString = geneString.replace("True", "X")
+        geneString = geneString.replace("False", "O")
+        return geneString
+
+    def getGenes(self):
+        return self.genes
 
     def print(self):
         print("Gene summary\n", self.genes, "\n", self.threshold)
@@ -41,23 +55,37 @@ class Genome:
  
 class Creature:
     def __init__(self, idnum):
-        self.idNum = idnum
+        self.idnum = idnum
         self.genome = Genome()
+        self.parentId = "?"
 
     def setRandomGenome(self):
         self.genome.makeRandomGenome()
 
-    def mutate(self):
+    def setOffspringGenomeAce(self, parent):
+        self.parentId = parent.getId()
+        self.genome.genes = parent.getGenes().copy()
+#        print("[DEBUG] Genome size:", len(self.genome.genes))
         self.genome.mutate()
         
     def getId(self):
-        return self.idNum
+        return self.idnum
 
     def getThresh(self):
         return self.genome.getThresh()
     
-    def print(self):
-        print("Creature id: ", self.idNum, "\n",
-              "Creature threshold: ", self.getThresh())
-        print(self.genome.genes)
-#        self.genome.print()
+    def getGenesString(self):
+        return self.genome.getGenesString()
+    
+    def getGenes(self):
+        return self.genome.getGenes()
+    
+    def getParent(self):
+        return self.parentId
+    
+    def printCreature(self):
+        print("Creature id: ", self.idnum, "\n",
+              "Creature threshold: ", self.getThresh(), "\n",
+              "Creature Parent:", self.getParent(),)
+        
+        print(self.getGenesString())
