@@ -1,12 +1,7 @@
 # The environment and graveyard simulate darwinian selection
 import creature as c
 import random as rand
-import uuid
 import helpers
-
-
-def randId():  # Generate id for creature dict, will move
-    return uuid.uuid4()
 
 
 class Graveyard:
@@ -26,10 +21,27 @@ class Environment:
     def __init__(self, cap):  # TODO: add debug mode
         self.temp = rand.randint(1, 100)
         self.populationCap = cap
-#        self.totalCreatures = 0
+
+    def __newId(self):
+        return self.getPopulation() + 1
+
+    def __testCreature(self, creatureId):  # Randomly kill c if they cant survive
+        if self.__isFit(creatureId):
+            chance = rand.randint(1, 100)
+            if chance >= 50:
+                self.killCreature(creatureId)
+                print("{} has perished".format(creatureId))
+            else:
+                print("{} survived, despite the odds".format(creatureId))
+
+    def __isFit(self, creatureId):
+        if self.getCreature(creatureId).getThresh() < self.temp:
+            return False
+        else:
+            return True
 
     def addCreature(self):  # Adds random creature
-        id = randId()
+        id = self.__newId()
         creature = c.Creature(id)
         creature.setRandomGenome()
         self.creatures.update({id: creature})  # Add creature to dict badly
@@ -41,7 +53,7 @@ class Environment:
         self.temp = rand.randint(1, 100)
 
     def reproduceCreature(self, parentId):
-        newId = randId()
+        newId = self.__newId()
         temp = c.Creature(newId)
         temp.setOffspringGenomeAce(self.creatures.get(parentId))
         self.creatures.update({newId: temp})  # Add new creature
@@ -59,24 +71,9 @@ class Environment:
         self.graveYard.add(self.creatures.get(creatureId))
         self.creatures.pop(creatureId)  # Remove creature
 
-    def testCreature(self, creatureId):  # Randomly kill c if they cant survive
-        if self.isFit(creatureId):
-            chance = rand.randint(1, 100)
-            if chance >= 50:
-                self.killCreature(creatureId)
-                print("{} has perished".format(creatureId))
-            else:
-                print("{} survived, despite the odds".format(creatureId))
-
-    def isFit(self, creatureId):
-        if self.getCreature(creatureId).getThresh() < self.temp:
-            return False
-        else:
-            return True
-
     def cullPopulation(self):
         for i in self.getIdList():
-            self.testCreature(i)
+            self.__testCreature(i)
 
     def getCreature(self, creatureId):
         return self.creatures.get(creatureId)
@@ -104,7 +101,7 @@ class Environment:
         if self.getPopulation() < self.getPopulationCap():  # if there's room
             print("{} new spots are avaliable".format(self.getOpenSpaces()))
         else:
-            print("No new spaces avaliable in enviornment")
+            print("No new spaces avaliable in environment")
 
 
 p = Environment(5)
@@ -118,4 +115,4 @@ while choice == "y":
     p.print()
     p.cullPopulation()
     p.reproduction()
-    choice = input("Continue? y/n")
+    choice = input("Continue? y/n ")
