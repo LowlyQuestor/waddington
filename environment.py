@@ -2,6 +2,7 @@
 import creature as c
 import random as rand
 import helpers
+import time
 
 
 class Graveyard:
@@ -22,8 +23,8 @@ class Environment:
         self.temp = rand.randint(1, 100)
         self.populationCap = cap
 
-    def __newId(self):
-        return self.getPopulation() + 1
+    def __newId(self):  # Return the current nanosecond for unique id
+        return time.time_ns()
 
     def __testCreature(self, creatureId):  # Randomly kill c if they cant survive
         if self.__isFit(creatureId):
@@ -102,17 +103,3 @@ class Environment:
             print("{} new spots are avaliable".format(self.getOpenSpaces()))
         else:
             print("No new spaces avaliable in environment")
-
-
-p = Environment(5)
-p.populate(5)
-choice = "y"
-gen = 0
-while choice == "y":
-    print("\n generation: {}".format(gen))
-    gen += 1
-    p.setRandTemp()
-    p.print()
-    p.cullPopulation()
-    p.reproduction()
-    choice = input("Continue? y/n ")
